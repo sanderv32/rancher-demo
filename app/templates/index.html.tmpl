@@ -17,8 +17,26 @@
             var lastSeen = {};
             var colors = new Object;
             var refreshInterval = Number({{ .RefreshInterval }});
+            
+            function getPetsAsset(pets) {
+                var asset;
+                switch (pets) {
+					case "cows":
+                  		asset = "static/img/rancher-logo-cow-blue.png"
+                  		break;
+                	case "chameleons": 
+                  		asset = "static/img/suse-logo-chameleon-green.png"
+                  		break;
+                	case "cowmeleons": 
+                  		asset = "static/img/suse-rancher-cowmeleon.png"
+                  		break;
+                	default:
+						asset = "static/img/rancher-logo-cow-blue.png"
+				}
+				return asset;
+			}
 
-            function getColor(cowColor) {
+            function getColor(contColor) {
                 var allColors = [
                     "red",
                     "orange",
@@ -34,10 +52,10 @@
 
                 color = allColors[Math.floor(Math.random()*allColors.length)];
 
-                if (color != cowColor) {
+                if (color != contColor) {
                     return color;
                 } else {
-                    return getColor(cowColor);
+                    return getColor(contColor);
                 }
             }
 
@@ -59,14 +77,15 @@
                      },
                      success: function(data){
                          if (! (colors.hasOwnProperty(data.version))) {
-                             colors[data.version] = getColor(data.cowColor);
+                             colors[data.version] = getColor(data.contColor);
                          }
                          var color = colors[data.version];
                          if ($.inArray(data.instance, containers) == -1) {
                              containers.push(data.instance);
                          }
 
-                         var cowColor = data.cowColor;
+                         var contColor = data.contColor;
+						 var petsAsset = getPetsAsset(data.pets);
 
                          // add timestamp for when we last saw this container
                          lastSeen[data.instance] = ts;
@@ -82,7 +101,7 @@
                                 if (displayName === null) {
                                     displayName = instanceName;
                                 }
-                                var elData = '<div id="instance-' + instanceName + '" class="card container-instance"><div class="image" id="replica" style="background-color: ' + cowColor + ';"><img width="25%" height="25%" src="static/img/rancher-logo-cow-blue.png"></div><div class="content centered view-computer"><div> {{ if .ShowVersion }}<div class="ui top left attached ' + color + ' label">' + data.version +'</div>{{ end }} <div id="instance-label-' + instanceName + '"class="ui top right attached green serving label">serving</div>' + displayName + '</div></div></div>';
+                                var elData = '<div id="instance-' + instanceName + '" class="card container-instance"><div class="image" id="replica" style="background-color: ' + contColor + ';"><img width="25%" height="25%" src="' + petsAsset + '"></div><div class="content centered view-computer"><div> {{ if .ShowVersion }}<div class="ui top left attached ' + color + ' label">' + data.version +'</div>{{ end }} <div id="instance-label-' + instanceName + '"class="ui top right attached green serving label">serving</div>' + displayName + '</div></div></div>';
 
                                 $("div.container-group").append(elData);
                                 el = $("#instance-" + instanceName);
@@ -141,6 +160,9 @@
                 <div class="ui container">
                     Inspired by <a href="https://github.com/ehazlett/docker-demo" target="_blank">ehazlett/docker-demo</a>
                     <img class="logo center" src="static/img/rancher-logo-stacked-white.png"/>
+                    
+                    
+                    
 
                     <div class="row centered">
                         <div class="ui huge statistic">

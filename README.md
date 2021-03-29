@@ -17,7 +17,7 @@ for showing scale-in of an upgraded application.
 - `REMOVE_INTERVAL`: how long after `EXPIRE_INTERVAL` until we remove the icon (default: 20s)
 - `SKIP_ERRORS`: set this to prevent errors from counting (useful on janky load balancers)
 - `METADATA`: extra text at bottom of info area
-- `COW_COLOR`: what color the cow background should be (default: black). Valid options are any color from the CSS pallete, including:
+- `CONTAINER_COLOR`: what color the container background should be (default: black). Valid options are any color from the CSS pallete, including:
   - red
   - orange
   - yellow
@@ -29,6 +29,10 @@ for showing scale-in of an upgraded application.
   - purple
   - pink
   - black
+- `PETS`: The kind of pet shown in each container. Valid options are:
+  - cows
+  - chameleons
+  - cowmeleons
 
 ## Build
 
@@ -46,6 +50,8 @@ By default the loaded page will reach back to `/demo` every `REFRESH_INTERVAL` a
 The container will listen for traffic on port 8080.
 
 ## Running
+
+Deploy using the included Helm chart under `./charts` or alternatively:
 
 1. Edit `base/configs/source-vars.yaml` and set the following:
     - `MY_NAMESPACE`: the namespace into which the app will be deployed (default: `rancher-demo`). This will be created if it does not already exist.
