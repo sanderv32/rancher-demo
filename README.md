@@ -8,6 +8,8 @@ out, until after a configurable number of seconds they will disappear. This is u
 demonstrating scaling up/down or in the case of an application like [Rio](https://rio.io),
 for showing scale-in of an upgraded application.
 
+![screenshot](screenshot-demo.png)
+
 ## Environment Variables
 
 - `TITLE`: sets title in demo app
