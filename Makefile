@@ -1,7 +1,7 @@
 CGO_ENABLED=0
 GOOS=linux
 GOARCH=amd64
-TAG?=latest
+TAG=1.0.0
 REPO=bashofmann/rancher-demo
 GO111MODULE=on
 
@@ -22,6 +22,11 @@ release:
 ifeq ($(GIT_TREE_STATE),dirty)
 	$(error git state is not clean)
 endif
-	echo foo
+	sed -i 's/appVersion: .*/appVersion: $(TAG)/g' charts/rancher-demo/Chart.yaml
+	sed -i 's/version: .*/version: $(TAG)/g' charts/rancher-demo/Chart.yaml
+	git add charts/rancher-demo/Chart.yaml
+	git commit -m "Helm Release version $(TAG)"
+	git tag -a $(TAG) -m "Release $(TAG)"
+	git push --tags
 
 .PHONY: build binary release
