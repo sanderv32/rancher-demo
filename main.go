@@ -34,7 +34,7 @@ type (
 		SkipErrors      bool
 		ShowVersion     bool
 		ContColor       string
-        Pets            string
+		Pets            string
 		RemoveInterval  string
 	}
 
@@ -44,7 +44,7 @@ type (
 		Metadata  string `json:"metadata,omitempty"`
 		RequestID string `json:"request_id,omitempty"`
 		ContColor string `json:"contColor"`
-        Pets      string `json:"pets"`
+		Pets      string `json:"pets"`
 	}
 
 	Info struct {
@@ -226,8 +226,8 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	if contColor == "" {
 		contColor = "black"
 	}
-  
-  	pets := os.Getenv("PETS")
+
+	pets := os.Getenv("PETS")
 	if pets == "" {
 		pets = "cows"
 	}
@@ -237,7 +237,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 		Version:   getVersion(),
 		Metadata:  getMetadata(),
 		ContColor: contColor,
-        Pets:      pets,
+		Pets:      pets,
 	}
 
 	requestID := r.Header.Get("X-Request-Id")

@@ -1,8 +1,9 @@
-FROM node:latest as ui
+FROM node:16 as ui
 COPY ui/package.json /tmp/
 COPY ui/package-lock.json /tmp/
 COPY ui/semantic.json /tmp/
-RUN cd /tmp && npm install && \
+WORKDIR /tmp
+RUN npm install && \
     mkdir -p /usr/src/app/ui && \
     cp -rf /tmp/node_modules /usr/src/app/ui/
 WORKDIR /usr/src/app
@@ -10,21 +11,21 @@ COPY . /usr/src/app
 RUN cp -f ui/semantic.theme.config ui/semantic/src/theme.config && \
     mkdir -p ui/semantic/src/themes/app && \
     cp -rf ui/semantic.theme/* ui/semantic/src/themes/app
-RUN cd ui/semantic && npx gulp build
+WORKDIR /usr/src/app/ui/semantic
+RUN npx gulp build
 
 FROM golang:1.16-alpine as app
-RUN apk add -U build-base git
+RUN apk add -U --no-cache build-base git
 COPY . /go/src/app
 WORKDIR /go/src/app
 ENV GO111MODULE=on
 RUN go build -a -v -tags 'netgo' -ldflags '-w -linkmode external -extldflags -static' -o rancher-demo .
 
-FROM alpine:latest
-RUN apk add -U --no-cache curl
+FROM alpine:3
 COPY static /static
-COPY --from=ui /usr/src/app/ui/semantic/dist/semantic.min.css static/dist/semantic.min.css
-COPY --from=ui /usr/src/app/ui/semantic/dist/semantic.min.js static/dist/semantic.min.js
-COPY --from=ui /usr/src/app/ui/semantic/dist/themes/default/assets static/dist/themes/default/
+COPY --from=ui /usr/src/app/ui/semantic/dist/semantic.min.css /static/dist/semantic.min.css
+COPY --from=ui /usr/src/app/ui/semantic/dist/semantic.min.js /static/dist/semantic.min.js
+COPY --from=ui /usr/src/app/ui/semantic/dist/themes/default/assets /static/dist/themes/default/
 COPY --from=app /go/src/app/rancher-demo /bin/rancher-demo
 COPY templates /templates
 EXPOSE 8080
