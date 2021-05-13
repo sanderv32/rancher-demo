@@ -74,13 +74,14 @@ jobs:
     needs: build
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Setup SSH Keys and known_hosts
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.FLEET_REPO_PRIVATE_KEY }}"
-
       - name: Bump release
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
