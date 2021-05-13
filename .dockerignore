@@ -3,3 +3,6 @@ base
 charts
 ui/node_modules
 ui/semantic
+.github
+.DS_Store
+
