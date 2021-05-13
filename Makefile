@@ -5,6 +5,12 @@ TAG?=latest
 REPO=bashofmann/rancher-demo
 GO111MODULE=on
 
+ifeq ($(strip $(shell git status --porcelain 2>/dev/null)),)
+	GIT_TREE_STATE=clean
+else
+	GIT_TREE_STATE=dirty
+endif
+
 all: build
 
 test:
@@ -17,6 +23,9 @@ build:
 	@docker build -t ${REPO}:${TAG} .
 
 release:
-	
+	ifeq ($(GIT_TREE_STATE),dirty)
+		$(error git state is not clean)
+	endif
+	echo foo
 
 .PHONY: build binary release
