@@ -5,11 +5,7 @@ TAG?=latest
 REPO=bashofmann/rancher-demo
 GO111MODULE=on
 
-ifeq ($(strip $(shell git status --porcelain 2>/dev/null)),)
-	GIT_TREE_STATE=clean
-else
-	GIT_TREE_STATE=dirty
-endif
+GIT_TREE_STATE=$(shell (git status --porcelain | grep -q .) && echo dirty || echo clean)
 
 all: build
 
