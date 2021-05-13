@@ -16,4 +16,7 @@ binary:
 build:
 	@docker build -t ${REPO}:${TAG} .
 
-.PHONY: build binary
+release:
+	
+
+.PHONY: build binary release

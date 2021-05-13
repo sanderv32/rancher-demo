@@ -1,11 +1,10 @@
 FROM node:16 as ui
-COPY ui/package.json /tmp/
-COPY ui/package-lock.json /tmp/
-COPY ui/semantic.json /tmp/
-WORKDIR /tmp
-RUN npm install && \
-    mkdir -p /usr/src/app/ui && \
-    cp -rf /tmp/node_modules /usr/src/app/ui/
+
+COPY ui/package.json /usr/src/app/
+COPY ui/package-lock.json /usr/src/app/
+COPY ui/semantic.json /usr/src/app/
+WORKDIR /usr/src/app/ui
+RUN npm install
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 RUN cp -f ui/semantic.theme.config ui/semantic/src/theme.config && \

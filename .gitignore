@@ -3,3 +3,4 @@
 _vendor*
 .npmrc
 ui/node_modules
+ui/semantic
