@@ -19,9 +19,9 @@ build:
 	@docker build -t ${REPO}:${TAG} .
 
 release:
-	ifeq ($(GIT_TREE_STATE),dirty)
-		$(error git state is not clean)
-	endif
+ifeq ($(GIT_TREE_STATE),dirty)
+	$(error git state is not clean)
+endif
 	echo foo
 
 .PHONY: build binary release
