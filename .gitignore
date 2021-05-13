@@ -1,5 +1,5 @@
 .DS_Store
-docker-demo
 *.swp
 _vendor*
 .npmrc
+ui/node_modules

@@ -17,17 +17,17 @@
             var lastSeen = {};
             var colors = new Object;
             var refreshInterval = Number({{ .RefreshInterval }});
-            
+
             function getPetsAsset(pets) {
                 var asset;
                 switch (pets) {
 					case "cows":
                   		asset = "static/img/rancher-logo-cow-blue.png"
                   		break;
-                	case "chameleons": 
+                	case "chameleons":
                   		asset = "static/img/suse-logo-chameleon-green.png"
                   		break;
-                	case "cowmeleons": 
+                	case "cowmeleons":
                   		asset = "static/img/suse-rancher-cowmeleon.png"
                   		break;
                 	default:
@@ -97,9 +97,11 @@
                                 console.log("creating instance " + instanceName);
 
                                 // create a shorter display name for the tile
-                                var displayName = instanceName.match(/.+-(\w+)$/)[1];
-                                if (displayName === null) {
+                                var displayName = instanceName.match(/.+-(\w+)$/);
+                                if (!displayName) {
                                     displayName = instanceName;
+                                } else {
+                                  displayName = displayName[1];
                                 }
                                 var elData = '<div id="instance-' + instanceName + '" class="card container-instance"><div class="image" id="replica" style="background-color: ' + contColor + ';"><img width="25%" height="25%" src="' + petsAsset + '"></div><div class="content centered view-computer"><div> {{ if .ShowVersion }}<div class="ui top left attached ' + color + ' label">' + data.version +'</div>{{ end }} <div id="instance-label-' + instanceName + '"class="ui top right attached green serving label">serving</div>' + displayName + '</div></div></div>';
 
@@ -160,9 +162,9 @@
                 <div class="ui container">
                     Inspired by <a href="https://github.com/ehazlett/docker-demo" target="_blank">ehazlett/docker-demo</a>
                     <img class="logo center" src="static/img/rancher-logo-stacked-white.png"/>
-                    
-                    
-                    
+
+
+
 
                     <div class="row centered">
                         <div class="ui huge statistic">
