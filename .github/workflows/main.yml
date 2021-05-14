@@ -12,12 +12,6 @@ jobs:
       - uses: hadolint/hadolint-action@v1.5.0
         with:
           dockerfile: Dockerfile
-      - name: Set up Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: v3.5.4
-      - name: helm-lint
-        run: helm lint charts/rancher-demo
       - uses: actions/setup-go@v1
         with:
           go-version: '1.16'
@@ -83,15 +77,31 @@ jobs:
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.FLEET_REPO_PRIVATE_KEY }}"
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.16'
       - name: Bump release
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          git clone git@github.com:bashofmann/rancher-k3s-fleet-examples.git
-          cd rancher-k3s-fleet-examples
-          sed -i 's/ref=.*/ref=${{ env.RELEASE_VERSION }}/g' cicd/rancher-demo/fleet.yaml
+          go get github.com/davidrjonas/semver-cli
+          git clone git@github.com:bashofmann/demo-charts.git
+          cd demo-charts
+          sed -i "s/appVersion:.*/appVersion: ${{ env.RELEASE_VERSION }}/g" charts/rancher-demo/Chart.yaml
+          current_chart_version=$(cat charts/rancher-demo/Chart.yaml | grep "^version: .*" | grep -o "[0-9.]\+")
+          next_chart_version=$(semver-cli inc minor $current_chart_version)
+          sed -i "s/version:.*/version: $next_chart_version/g" charts/rancher-demo/Chart.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
           git commit -m "bump rancher-demo to ${{ env.RELEASE_VERSION }}"
+          git push
+          cd ..
+          git clone git@github.com:bashofmann/rancher-k3s-fleet-examples.git
+          cd rancher-k3s-fleet-examples
+          sed -i "s/version: .*/version: $next_chart_version/g" cicd/rancher-demo/fleet.yaml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "bump rancher-demo to $next_chart_version"
           git push

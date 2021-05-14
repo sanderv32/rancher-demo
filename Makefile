@@ -22,11 +22,6 @@ release:
 ifeq ($(GIT_TREE_STATE),dirty)
 	$(error git state is not clean)
 endif
-	sed -i 's/appVersion: .*/appVersion: $(TAG)/g' charts/rancher-demo/Chart.yaml
-	sed -i 's/version: .*/version: $(TAG)/g' charts/rancher-demo/Chart.yaml
-	git add charts/rancher-demo/Chart.yaml
-	git commit -m "Helm Release version $(TAG)"
-	git push
 	git tag -a $(TAG) -m "Release $(TAG)"
 	git push --tags
 
