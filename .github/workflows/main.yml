@@ -107,7 +107,8 @@ jobs:
           echo "Waiting for Helm release to finish"
           while [[ "$deployed_version" != "$next_chart_version" ]]; do
             sleep 5
-            helm repo update > /dev/null
+            helm repo update
+            helm search repo rancher-demo
             deployed_version=$(helm search repo rancher-demo -o json | jq -r '.[0].version')
           done
           echo "Helm release to finished"
