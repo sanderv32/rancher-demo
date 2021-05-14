@@ -64,7 +64,7 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
-  deploy:
+  deploy-chart:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
@@ -80,7 +80,13 @@ jobs:
       - uses: actions/setup-go@v1
         with:
           go-version: '1.16'
-      - name: Bump release
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.5.4
+      - name: Install jq
+        run: sudo apt-get install jq
+      - name: Bump chart
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
@@ -96,7 +102,39 @@ jobs:
           git add .
           git commit -m "bump rancher-demo to ${{ env.RELEASE_VERSION }}"
           git push
-          cd ..
+          helm repo add demo-charts https://bashofmann.github.io/demo-charts
+          deployed_version=""
+          while [[ "$deployed_version" != "$next_chart_version" ]]; do
+            sleep 5
+            helm repo update
+            deployed_version=$(helm search repo rancher-demo -o json | jq -r '.[0].version')
+          done
+
+  deploy-fleet:
+    runs-on: ubuntu-latest
+    needs: deploy-chart
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    steps:
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Setup SSH Keys and known_hosts
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.CHART_REPO_PRIVATE_KEY }}"
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.5.4
+      - name: Install jq
+        run: sudo apt-get install jq
+      - name: Bump fleet
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          helm repo add demo-charts https://bashofmann.github.io/demo-charts
+          next_chart_version=$(helm search repo rancher-demo -o json | jq -r '.[0].version')
           git clone git@github.com:bashofmann/rancher-k3s-fleet-examples.git
           cd rancher-k3s-fleet-examples
           sed -i "s/version: .*/version: $next_chart_version/g" cicd/rancher-demo/fleet.yaml
