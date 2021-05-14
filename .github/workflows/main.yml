@@ -44,8 +44,6 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
-          file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
 #          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
@@ -56,7 +54,6 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: bashofmann/rancher-demo:${{ env.RELEASE_VERSION }}
-          format: table
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
@@ -76,7 +73,7 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.FLEET_REPO_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.CHART_REPO_PRIVATE_KEY }}"
       - uses: actions/setup-go@v1
         with:
           go-version: '1.16'
@@ -97,6 +94,8 @@ jobs:
           sed -i "s/appVersion:.*/appVersion: ${{ env.RELEASE_VERSION }}/g" charts/rancher-demo/Chart.yaml
           current_chart_version=$(cat charts/rancher-demo/Chart.yaml | grep "^version: .*" | grep -o "[0-9.]\+")
           next_chart_version=$(semver-cli inc minor $current_chart_version)
+          echo "Current chart version: $current_chart_version"
+          echo "Next chart version: $next_chart_version"
           sed -i "s/version:.*/version: $next_chart_version/g" charts/rancher-demo/Chart.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -105,11 +104,13 @@ jobs:
           git push
           helm repo add demo-charts https://bashofmann.github.io/demo-charts
           deployed_version=""
+          echo "Waiting for Helm release to finish"
           while [[ "$deployed_version" != "$next_chart_version" ]]; do
             sleep 5
-            helm repo update
+            helm repo update > /dev/null
             deployed_version=$(helm search repo rancher-demo -o json | jq -r '.[0].version')
           done
+          echo "Helm release to finished"
 
   deploy-fleet:
     runs-on: ubuntu-latest
@@ -123,7 +124,7 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.CHART_REPO_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.FLEET_REPO_PRIVATE_KEY }}"
       - name: Set up Helm
         uses: azure/setup-helm@v1
         with:
