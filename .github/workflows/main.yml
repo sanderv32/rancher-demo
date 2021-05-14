@@ -94,6 +94,7 @@ jobs:
           sed -i "s/appVersion:.*/appVersion: ${{ env.RELEASE_VERSION }}/g" charts/rancher-demo/Chart.yaml
           current_chart_version=$(cat charts/rancher-demo/Chart.yaml | grep "^version: .*" | grep -o "[0-9.]\+")
           next_chart_version=$(semver-cli inc minor $current_chart_version)
+          echo "CHART_VERSION=${next_chart_version}" >> $GITHUB_ENV
           echo "Current chart version: $current_chart_version"
           echo "Next chart version: $next_chart_version"
           sed -i "s/version:.*/version: $next_chart_version/g" charts/rancher-demo/Chart.yaml
@@ -102,10 +103,12 @@ jobs:
           git add .
           git commit -m "bump rancher-demo to ${{ env.RELEASE_VERSION }}"
           git push
-          deployed_version=""
-          echo "Waiting for Helm release to finish"
-          sleep 120
-# TODO: actually check that the release job finished
+      - uses: ifaxity/wait-on-action
+        name: wait for helm release
+        with:
+          resource: https://github.com/bashofmann/demo-charts/releases/download/rancher-demo-${{ env.CHART_VERSION }}/rancher-demo-${{ env.CHART_VERSION }}.tgz
+          interval: 10s
+
   deploy-fleet:
     runs-on: ubuntu-latest
     needs: deploy-chart
