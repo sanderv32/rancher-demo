@@ -104,15 +104,8 @@ jobs:
           git push
           deployed_version=""
           echo "Waiting for Helm release to finish"
-          while [[ "$deployed_version" != "$next_chart_version" ]]; do
-            sleep 5
-            helm repo add demo-charts https://bashofmann.github.io/demo-charts
-            helm search repo rancher-demo
-            deployed_version=$(helm search repo rancher-demo -o json | jq -r '.[0].version')
-            helm repo remove demo-charts
-          done
-          echo "Helm release to finished"
-
+          sleep 120
+# TODO: actually check that the release job finished
   deploy-fleet:
     runs-on: ubuntu-latest
     needs: deploy-chart
