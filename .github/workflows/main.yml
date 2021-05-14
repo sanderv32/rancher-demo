@@ -90,7 +90,7 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          export PATH="$GOPATH:$PATH"
+          export PATH=${PATH}:`go env GOPATH`/bin
           go get github.com/davidrjonas/semver-cli
           git clone git@github.com:bashofmann/demo-charts.git
           cd demo-charts
