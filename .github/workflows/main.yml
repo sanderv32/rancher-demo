@@ -103,7 +103,7 @@ jobs:
           git add .
           git commit -m "bump rancher-demo to ${{ env.RELEASE_VERSION }}"
           git push
-      - uses: ifaxity/wait-on-action
+      - uses: ifaxity/wait-on-action@v1
         name: wait for helm release
         with:
           resource: https://github.com/bashofmann/demo-charts/releases/download/rancher-demo-${{ env.CHART_VERSION }}/rancher-demo-${{ env.CHART_VERSION }}.tgz
