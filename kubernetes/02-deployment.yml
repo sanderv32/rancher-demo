@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: rancher-demo
+  name: rancher-demo
+  labels:
+    app: rancher-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rancher-demo
+  template:
+    metadata:
+      labels:
+        app: rancher-demo
+    spec:
+      containers:
+      - name: rancher-demo
+        image: rancher-demo:0.0.1
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+
